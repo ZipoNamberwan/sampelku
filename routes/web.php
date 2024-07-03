@@ -1,22 +1,29 @@
 <?php
 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\MainController;
+use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-
-Route::get('/', function () {
-    return Inertia::render('Pcl/PetugasPage');
-});
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/', [MainController::class, 'index'])->middleware('check.role');
+    Route::get('/sample', [MainController::class, 'getSample']);
+
+    Route::group(['middleware' => ['role:admin']], function () {
+        Route::get('/admin', [AdminController::class, 'index']);
+    });
+
+    Route::group(['middleware' => ['role:pml']], function () {
+        Route::get('/recommendation', [PetugasController::class, 'recommendation']);
+    });
+
+    Route::group(['middleware' => ['role:pml|pcl']], function () {
+        Route::get('/pcl', [PetugasController::class, 'pclIndex']);
+        Route::get('/pml', [PetugasController::class, 'pmlIndex']);
+    });
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
