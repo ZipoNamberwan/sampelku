@@ -9,7 +9,7 @@
 @endsection
 
 @section('container')
-<div class="header bg-success pb-6">
+<div class="header bg-warning pb-6">
     <div class="container-fluid">
         <div class="header-body">
             <div class="row align-items-center py-4">
@@ -35,7 +35,7 @@
                 <div class="card">
                     <!-- Card header -->
                     <div class="card-header">
-                        <h3 class="mb-0">Progres Pencacahan Per Tanggal</h3>
+                        <h3 class="mb-0">Beranda</h3>
                     </div>
                     <!-- Card body -->
                     <div class="card-body">

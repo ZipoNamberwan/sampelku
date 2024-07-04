@@ -16,5 +16,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SurveySeeder::class);
         $this->call(UserSeeder::class);
         $this->call(PivotSeeder::class);
+        $this->call(CadanganSeeder::class);
     }
 }

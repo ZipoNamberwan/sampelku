@@ -34,6 +34,10 @@ return new class extends Migration
             $table->string('sample_unique_code');
             $table->string('sample_name');
             $table->string('sample_address')->nullable();
+            $table->string('job')->nullable();
+            $table->string('category')->nullable();
+            $table->string('kbli')->nullable();
+            $table->string('strata')->nullable();
             $table->boolean('is_selected')->default(true);
             $table->enum('type', ['Utama', 'Cadangan'])->nullable();
             $table->enum('status_recommendation', ['Diajukan', 'Diterima', 'Ditolak'])->nullable();

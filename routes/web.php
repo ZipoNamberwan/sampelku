@@ -11,6 +11,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/', [MainController::class, 'index'])->middleware('check.role');
     Route::get('/sample', [MainController::class, 'getSample']);
+    Route::get('/sample/status', [MainController::class, 'getSampleChangeStatus']);
+    Route::patch('/sample/notactive/{id}', [MainController::class, 'setNotActive']);
 
     Route::group(['middleware' => ['role:admin']], function () {
         Route::get('/admin', [AdminController::class, 'index']);
@@ -18,6 +20,7 @@ Route::middleware('auth')->group(function () {
 
     Route::group(['middleware' => ['role:pml']], function () {
         Route::get('/recommendation', [PetugasController::class, 'recommendation']);
+        Route::get('/status', [PetugasController::class, 'status']);
     });
 
     Route::group(['middleware' => ['role:pml|pcl']], function () {

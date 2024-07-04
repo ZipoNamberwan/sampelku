@@ -20,4 +20,9 @@ class PetugasController extends Controller
     {
         return view('pml/recommendation');
     }
+
+    function status()
+    {
+        return view('pml/status');
+    }
 }
