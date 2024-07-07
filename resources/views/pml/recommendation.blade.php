@@ -75,7 +75,9 @@
 
                     <label class="form-control-label">Status <span class="text-danger">*</span></label>
                     <select id="status" name="status" class="form-control" data-toggle="select" name="subdistrict" required>
-                        <option value="0" disabled selected> -- Pilih Status -- </option>
+                        <option value="Belum Dicacah">
+                            Belum Dicacah
+                        </option>
                         <option value="Aktif">
                             Aktif
                         </option>
@@ -113,9 +115,15 @@
     document.getElementById('search').addEventListener('input', function() {
         if (event.type === 'input') {
             clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(() => {
-                loadSample();
-            }, 500);
+            const inputValue = event.target.value.trim();
+            if (inputValue.length >= 3) {
+                debounceTimeout = setTimeout(() => {
+                    loadSample();
+                }, 500);
+            } else {
+                const resultDiv = document.getElementById('samplelist');
+                resultDiv.innerHTML = '';
+            }
         }
     });
 

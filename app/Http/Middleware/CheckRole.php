@@ -23,9 +23,9 @@ class CheckRole
             if ($user->hasRole('admin')) {
                 return redirect('/admin');
             } else if ($user->hasRole('pml')) {
-                return redirect('/pml');
+                return redirect('/my-sample');
             } else {
-                return redirect('/pcl');
+                return redirect('/my-sample');
             }
         }
 

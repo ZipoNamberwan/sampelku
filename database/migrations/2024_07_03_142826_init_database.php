@@ -39,9 +39,9 @@ return new class extends Migration
             $table->string('kbli')->nullable();
             $table->string('strata')->nullable();
             $table->boolean('is_selected')->default(true);
-            $table->enum('type', ['Utama', 'Cadangan'])->nullable();
+            $table->enum('type', ['Utama', 'Cadangan', 'Cadangan Tambahan'])->nullable();
             $table->enum('status_recommendation', ['Diajukan', 'Diterima', 'Ditolak'])->nullable();
-            $table->enum('status', ['Aktif', 'Tidak Aktif'])->nullable();
+            $table->enum('status', ['Belum Dicacah', 'Aktif', 'Tidak Aktif'])->nullable();
             $table->foreignId('pcl_id')->nullable()->constrained('users');
             $table->foreignId('pml_id')->nullable()->constrained('users');
             $table->foreignId('survey_id')->nullable()->constrained('surveys');

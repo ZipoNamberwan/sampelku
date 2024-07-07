@@ -12,7 +12,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [MainController::class, 'index'])->middleware('check.role');
     Route::get('/sample', [MainController::class, 'getSample']);
     Route::get('/sample/status', [MainController::class, 'getSampleChangeStatus']);
+    Route::get('/sample/change', [MainController::class, 'getBackupSample']);
+    Route::get('/sample/full', [MainController::class, 'getSampleFull']);
+    Route::patch('/sample/change', [MainController::class, 'changeSample']);
+    Route::delete('/sample/change', [MainController::class, 'deleteChangeSample']);
     Route::patch('/sample/notactive/{id}', [MainController::class, 'setNotActive']);
+
+    Route::get('/my-sample', [MainController::class, 'getMySample']);
+    Route::get('/status', [PetugasController::class, 'status']);
 
     Route::group(['middleware' => ['role:admin']], function () {
         Route::get('/admin', [AdminController::class, 'index']);
@@ -20,12 +27,6 @@ Route::middleware('auth')->group(function () {
 
     Route::group(['middleware' => ['role:pml']], function () {
         Route::get('/recommendation', [PetugasController::class, 'recommendation']);
-        Route::get('/status', [PetugasController::class, 'status']);
-    });
-
-    Route::group(['middleware' => ['role:pml|pcl']], function () {
-        Route::get('/pcl', [PetugasController::class, 'pclIndex']);
-        Route::get('/pml', [PetugasController::class, 'pmlIndex']);
     });
 });
 

@@ -35,4 +35,29 @@ class Sample extends Model
     {
         return $this->hasMany(Sample::class, 'replacement_id');
     }
+
+    // Recursive method to fetch the replacement chain
+    public function getReplacementChain()
+    {
+        $chain = collect([$this]);
+
+        $current = $this;
+        while ($current->replacement) {
+            $current = $current->replacement;
+            $chain->push($current);
+        }
+
+        return $chain;
+    }
+
+    public function getLastReplacement()
+    {
+        $current = $this;
+
+        while ($current->replacement) {
+            $current = $current->replacement;
+        }
+
+        return $current;
+    }
 }
