@@ -31,7 +31,7 @@
                     <div class="row">
                         <div class="col-6 collapse-brand">
                             <a href="/pages/dashboards/dashboard.html">
-                                <img src="/assets/img/brand/blue.png">
+                                <img src="/assets/img/brand/blue-2.png">
                             </a>
                         </div>
                         <div class="col-6 collapse-close">
@@ -60,8 +60,8 @@
                 <div class="header-body text-center mb-6">
                     <div class="row justify-content-center">
                         <div class="col-xl-5 col-lg-6 col-md-8 px-5">
-                            <!-- <img src="/assets/img/brand/blue.png" class="logologin"> -->
-                            <h1 style="font-weight: 900;">Sampelku</h1>
+                            <img src="/assets/img/brand/blue-2.png" class="logologin">
+                            <!-- <h1 style="font-weight: 900;">Sampelku</h1> -->
                         </div>
                     </div>
                 </div>
