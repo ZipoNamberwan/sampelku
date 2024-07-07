@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
         $pclrole = Role::create(['name' => 'pcl']);
         $pmlrole = Role::create(['name' => 'pml']);
 
-        $pml1 = User::create(['name' => 'Lita Gadis Pertiwi', 'email' => 'lita.pertiwi@bps.go.id', 'password' => bcrypt('sampelkujos'),]);
+        $pml1 = User::create(['name' => 'Lita Gadis Pertiwi', 'email' => 'lita.pertiwi@bps.go.id', 'password' => bcrypt('sampelkugood'),]);
         $pml1->assignRole('pml');
         $pml1->assignRole('admin');
         $pml2 = User::create(['name' => 'Paramitha Dian Linggani Putri', 'email' => 'paramitha.putri@bps.go.id', 'password' => bcrypt('sampelkujos'),]);

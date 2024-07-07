@@ -43,7 +43,7 @@
                     <!-- Card body -->
                     <div class="card-body">
                         @hasrole('pml')
-                        <a href="{{url('/recommendation')}}" class="mb-2 btn btn-primary btn-round btn-icon" data-toggle="tooltip" data-original-title="Tambah Jadwal Panen">
+                        <a href="{{url('/recommendation')}}" class="mb-2 btn btn-primary btn-round btn-icon" data-toggle="tooltip" data-original-title="Pengajuan Ganti Sampel">
                             <span class="btn-inner--icon"><i class="fas fa-plus-circle"></i></span>
                             <span class="btn-inner--text">Pengajuan Ganti Sampel</span>
                         </a>
