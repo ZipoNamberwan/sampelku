@@ -228,6 +228,12 @@ class MainController extends Controller
             $sampleData["sample_address"] = $sample->sample_address;
             $sampleData["type"] = $sample->type;
             $sampleData["replacement_id"] = $sample->replacement_id;
+            $sampleData["pcl"] = $sample->pcl->email;
+            $sampleData["pml"] = $sample->pml->email;
+            $sampleData["subdistrict_code"] = $sample->subdistrict_code;
+            $sampleData["subdistrict_name"] = $sample->subdistrict_name;
+            $sampleData["village_code"] = $sample->village_code;
+            $sampleData["village_name"] = $sample->village_name;
 
             $sampleData['replacement_chain'] = $sample->getReplacementChain();
             // $sampleData["replacement_unique_code"] = $sample->replacement != null ? $sample->replacement->sample_unique_code : '';
@@ -237,6 +243,12 @@ class MainController extends Controller
             $samplesArray[] = $sampleData;
             $i++;
         }
+
+        // Sample::where(['sample_unique_code' => ''])->first()->update([
+        //     'village_code' => '',
+        //     'village_name' => '',
+        //     'bs_code' => ''
+        // ])
 
         return json_encode([
             "draw" => $request->draw,
@@ -267,6 +279,20 @@ class MainController extends Controller
         }
         if ($request->category != null) {
             $records->where('category', 'LIKE', '%' . $request->category . '%');
+        }
+        if ($request->subdistrict != null) {
+            $subdistrict = $request->subdistrict;
+            $records->where(function ($subQuery) use ($subdistrict) {
+                $subQuery->where('subdistrict_code', 'like', '%' . $subdistrict . '%')
+                    ->orWhere('subdistrict_name', 'like', '%' . $subdistrict . '%');
+            });
+        }
+        if ($request->village != null) {
+            $village = $request->village;
+            $records->where(function ($subQuery) use ($village) {
+                $subQuery->where('village_code', 'like', '%' . $village . '%')
+                    ->orWhere('village_name', 'like', '%' . $village . '%');
+            });
         }
 
         $recordsTotal = $records->count();
@@ -332,6 +358,10 @@ class MainController extends Controller
             $sampleData["job"] = $sample->job;
             $sampleData["is_selected"] = $sample->is_selected;
             $sampleData["available"] = count($sample->replacing) == 0;
+            $sampleData["subdistrict_code"] = $sample->subdistrict_code;
+            $sampleData["subdistrict_name"] = $sample->subdistrict_name;
+            $sampleData["village_code"] = $sample->village_code;
+            $sampleData["village_name"] = $sample->village_name;
 
             $samplesArray[] = $sampleData;
             $i++;

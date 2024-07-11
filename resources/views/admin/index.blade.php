@@ -109,15 +109,23 @@
                         </div>
                     </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-sm-12 col-md-6 col-lg-3">
-                        <input placeholder="KBLI" type="text" name="kbli" id="kbli-filter" class="form-control" onchange="filter()">
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3">
-                        <input placeholder="Strata" type="text" name="strata" id="strata-filter" class="form-control" onchange="filter()">
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3">
-                        <input placeholder="Kategori" type="text" name="category" id="category-filter" class="form-control" onchange="filter()">
+                <div>
+                    <div class="row mb-3 px-2">
+                        <div class="col-sm-12 col-md-6 col-lg-3 p-0 my-1 mx-1">
+                            <input placeholder="Kode/Nama Kecamatan" type="text" name="subdistrict" id="subdistrict-filter" class="form-control" onchange="filter()">
+                        </div>
+                        <div class="col-sm-12 col-md-6 col-lg-3 p-0 my-1 mx-1">
+                            <input placeholder="Kode/Nama Desa" type="text" name="village" id="village-filter" class="form-control" onchange="filter()">
+                        </div>
+                        <div class="col-sm-12 col-md-6 col-lg-3 p-0 my-1 mx-1">
+                            <input placeholder="KBLI" type="text" name="kbli" id="kbli-filter" class="form-control" onchange="filter()">
+                        </div>
+                        <div class="col-sm-12 col-md-6 col-lg-3 p-0 my-1 mx-1">
+                            <input placeholder="Strata" type="text" name="strata" id="strata-filter" class="form-control" onchange="filter()">
+                        </div>
+                        <div class="col-sm-12 col-md-6 col-lg-3 p-0 my-1 mx-1">
+                            <input placeholder="Kategori" type="text" name="category" id="category-filter" class="form-control" onchange="filter()">
+                        </div>
                     </div>
                 </div>
                 <div class="table-responsive">
@@ -224,7 +232,10 @@
                     if (type === 'display') {
                         return `
                             <h5><i class="fas fa-arrow-alt-circle-down text-danger"></i> [${row.sample_unique_code}] ${row.sample_name}</h5>
-                            <p style="font-size: 0.9rem;">${row.sample_address}</p>
+                            <p style="font-size: 0.9rem" class="mb-1">[${row.subdistrict_code}] ${row.subdistrict_name}, [${row.village_code}] ${row.village_name}</p>
+                            <p class="mb-1" style="font-size: 0.9rem;">${row.sample_address}</p>
+                            <p class="mb-1" style="font-size: 0.9rem;">${row.pcl}</p>
+                            <p class="mb-1" style="font-size: 0.9rem;">${row.pml}</p>
                         `
                     }
                     return data;
@@ -300,6 +311,8 @@
         document.getElementById('replaced-id').value = sample.id
 
         tablechange.ajax.url('/sample/change').load()
+        document.getElementById('subdistrict-filter').value = ''
+        document.getElementById('village-filter').value = ''
         document.getElementById('kbli-filter').value = ''
         document.getElementById('strata-filter').value = ''
         document.getElementById('category-filter').value = ''
@@ -310,6 +323,8 @@
                 <p style="font-size: 0.9rem;" class="mb-0">Strata: ${sample.strata}</p>
                 <p style="font-size: 0.9rem;" class="mb-0">KBLI: ${sample.kbli}</p>
                 <p style="font-size: 0.9rem;" class="mb-0">Kategori: ${sample.category}</p>
+                <p style="font-size: 0.9rem;" class="mb-0">Kecamatan: [${sample.subdistrict_code}] ${sample.subdistrict_name}</p>
+                <p style="font-size: 0.9rem;" class="mb-0">Desa/Kel: [${sample.village_code}] ${sample.village_name}</p>
                     
         `
         document.getElementById('replaced').innerHTML = `
@@ -352,7 +367,9 @@
                     if (type === 'display') {
                         var html = `
                             <h5 class="mb-1">[${row.sample_unique_code}] ${data}</h5>
-                            <p style="font-size: 0.9rem" class="mb-1">(${row.subdistrict_name} ${row.village_name}) ${row.sample_address}</p>
+                            <p style="font-size: 0.9rem" class="mb-1">[${row.subdistrict_code}] ${row.subdistrict_name}</p>
+                            <p style="font-size: 0.9rem" class="mb-1">[${row.village_code}] ${row.village_name}</p>
+                            <p style="font-size: 0.9rem" class="mb-1">${row.sample_address}</p>
                         `
                         return html
                     }
@@ -397,6 +414,22 @@
         }
     });
 
+    document.getElementById('subdistrict-filter').addEventListener('input', function() {
+        if (event.type === 'input') {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                filter();
+            }, 500);
+        }
+    });
+    document.getElementById('village-filter').addEventListener('input', function() {
+        if (event.type === 'input') {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                filter();
+            }, 500);
+        }
+    });
     document.getElementById('kbli-filter').addEventListener('input', function() {
         if (event.type === 'input') {
             clearTimeout(debounceTimeout);
@@ -437,6 +470,14 @@
     function filter() {
         var url = '?'
 
+        var subdistrictfilter = ''
+        if (document.getElementById('subdistrict-filter').value != '') {
+            url = url + '&subdistrict=' + document.getElementById('subdistrict-filter').value
+        }
+        var villagefilter = ''
+        if (document.getElementById('village-filter').value != '') {
+            url = url + '&village=' + document.getElementById('village-filter').value
+        }
         var kblifilter = ''
         if (document.getElementById('kbli-filter').value != '') {
             url = url + '&kbli=' + document.getElementById('kbli-filter').value
