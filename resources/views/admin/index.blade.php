@@ -338,8 +338,10 @@
                                 html = html + `<p class="text-muted mb-1 font-weight-bold" style="font-size: 0.9rem">Sampel Pengganti Sedang Dicacah</p>`
                             }
 
-                            if (data[i].replacement_id == null){
-                                html = html + `<h5 class="mb-1">Kategori: ${data[i].category}</h5>`
+                            if (i > 0) {
+                                if (data[i].replacement_id == null) {
+                                    html = html + `<h5 class="mb-1">Kategori: ${data[i].category}</h5>`
+                                }
                             }
                         }
                         return html
