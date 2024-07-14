@@ -50,6 +50,17 @@ class Sample extends Model
         return $chain;
     }
 
+    // public static function sortByLastReplacementModified()
+    // {
+    //     $samples = self::with('replacement')->get();
+    
+    //     $sortedSamples = $samples->sortBy(function ($sample) {
+    //         return $sample->getLastReplacement()->modified;
+    //     });
+    
+    //     return $sortedSamples;
+    // }
+
     public function getLastReplacement()
     {
         $current = $this;

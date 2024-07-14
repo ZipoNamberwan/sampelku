@@ -9,6 +9,15 @@
 <link rel="stylesheet" href="/assets/css/text.css">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
+<style>
+    .table td,
+    .table th {
+        font-size: .8125rem;
+        word-wrap: break-word;
+        white-space: nowrap !important;
+        /* wrap table di sini cari di sini*/
+    }
+</style>
 @endsection
 
 @section('container')
@@ -74,8 +83,8 @@
                                 <table class="table" id="datatable-id" width="100%">
                                     <thead class="thead-light">
                                         <tr>
-                                            <th style="max-width: 400px;">Sampel Utama</th>
-                                            <th style="max-width: 400px;">Pengganti</th>
+                                            <th>Sampel Utama</th>
+                                            <th>Pengganti</th>
                                             @hasrole('pml') <th>Aksi</th> @endrole
                                         </tr>
                                     </thead>
@@ -138,6 +147,31 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header pb-1">
+                <div>
+                    <h2 id="modaltitle">Detail Sampel</h2>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body pt-0" style="height: auto;">
+                <h3 id="sample-name-detail"></h3>
+                <p id="address-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+                <p id="strata-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+                <p id="kbli-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+                <p id="category-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+                <p id="subdistrict-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+                <p id="village-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+                <p id="job-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('optionaljs')
@@ -161,8 +195,14 @@
                 "render": function(data, type, row) {
                     if (type === 'display') {
                         return `
-                            <h5><i class="fas fa-arrow-alt-circle-down text-danger"></i> [${row.sample_unique_code}] ${row.sample_name}</h5>
-                            <p style="font-size: 0.9rem;">${row.sample_address}</p>
+                            <h5 style="cursor: pointer" onclick='openDetail(${JSON.stringify(row)}, true, false)' data-toggle="modal" data-target="#detailModal">
+                                <i class="fas fa-arrow-alt-circle-down text-danger"></i> [${row.sample_unique_code}] ${row.sample_name}
+                                <i class="fas fa-info-circle text-info"></i>
+                            </h5>
+                            <p style="font-size: 0.9rem" class="mb-1">[${row.subdistrict_code}] ${row.subdistrict_name}, [${row.village_code}] ${row.village_name}</p>
+                            <p class="mb-1" style="font-size: 0.9rem;">${row.sample_address}</p>
+                            <p class="mb-1" style="font-size: 0.9rem;">${row.pcl}</p>
+                            <p class="mb-1" style="font-size: 0.9rem;">${row.pml}</p>
                         `
                     }
                     return data;
@@ -178,16 +218,27 @@
                         for (var i = 0; i < data.length; i++) {
                             if (i > 0) {
                                 var icon = ''
+                                var isreplaced = false
+                                var isreplacing = false
                                 if (data[i].status == 'Tidak Aktif' && data[i].replacement_id != null) {
                                     icon = '<i class="fas fa-arrow-alt-circle-up text-success"></i><i class="fas fa-arrow-alt-circle-down text-danger"></i>'
+                                    isreplaced = true
+                                    isreplacing = true
                                 } else {
                                     icon = '<i class="fas fa-arrow-alt-circle-up text-success"></i>'
+                                    isreplacing = true
                                 }
-                                html = html + `<h5>${icon} [${data[i].sample_unique_code}] ${data[i].sample_name}</h5>`
+                                var detail = `<i class="fas fa-info-circle text-info"></i>`
+
+                                html = html + `<h5 style="cursor: pointer" onclick='openDetail(${JSON.stringify(data[i])}, ${isreplaced}, ${isreplacing})' data-toggle="modal" data-target="#detailModal">${icon} [${data[i].sample_unique_code}] ${data[i].sample_name} ${detail}</h5>`
                             }
 
                             if (data[i].replacement_id == null && data[i].status == 'Tidak Aktif') {
                                 html = html + `<p class="text-danger mb-1 font-weight-bold" style="font-size: 0.9rem">Menunggu Sampel Pengganti</p>`
+                            } else if (data[i].replacement_id == null && data[i].status == 'Aktif') {
+                                html = html + `<p class="text-success mb-1 font-weight-bold" style="font-size: 0.9rem">Sampel Pengganti Berhasil Dicacah</p>`
+                            } else if (data[i].replacement_id == null && (data[i].status == null || data[i].status == 'Belum Dicacah')) {
+                                html = html + `<p class="text-muted mb-1 font-weight-bold" style="font-size: 0.9rem">Sampel Pengganti Sedang Dicacah</p>`
                             }
                         }
                         return html
@@ -303,6 +354,24 @@
 
     function onStatusSampleChange() {
         table.ajax.url('/sample/status/?status=' + document.getElementById('status_sample').value).load();
+    }
+
+    function openDetail(sample, isreplaced, isreplacing) {
+        var icon = ''
+        if (isreplaced) {
+            icon = icon + `<i class="fas fa-arrow-alt-circle-down text-danger"></i>`
+        }
+        if (isreplacing) {
+            icon = icon + `<i class="fas fa-arrow-alt-circle-up text-success"></i>`
+        }
+        document.getElementById('sample-name-detail').innerHTML = `${icon} [${sample.sample_unique_code}] ${sample.sample_name}`
+        document.getElementById('address-detail').innerHTML = `Alamat: ${sample.sample_address}`
+        document.getElementById('strata-detail').innerHTML = `Strata: ${sample.strata}`
+        document.getElementById('kbli-detail').innerHTML = `KBLI: ${sample.kbli}`
+        document.getElementById('category-detail').innerHTML = `Kategori: ${sample.category}`
+        document.getElementById('subdistrict-detail').innerHTML = `Kecamatan: [${sample.subdistrict_code}] ${sample.subdistrict_name}`
+        document.getElementById('village-detail').innerHTML = `Desa/Kel: [${sample.village_code}] ${sample.village_name}`
+        document.getElementById('job-detail').innerHTML = `Kegiatan: ${sample.job}`
     }
 </script>
 @endsection

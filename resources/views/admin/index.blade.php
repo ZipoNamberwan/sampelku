@@ -49,14 +49,40 @@
 
                         <div class="row mt-4">
                             <div class="col-sm-12 col-md-3">
-                                <label class="form-control-label">Status Penggantian Sampel <span class="text-danger">*</span></label>
-                                <select onchange="onStatusSampleChange()" id="status_sample" class="form-control" data-toggle="select" name="status_sample" required>
+                                <label class="form-control-label">Status</label>
+                                <select onchange="onMainSampleFilter()" id="status_sample" class="form-control" data-toggle="select" name="status_sample" required>
                                     <option value="all">
                                         Semua
                                     </option>
                                     <option value="no">
                                         Menunggu Sampel Pengganti
                                     </option>
+                                </select>
+                            </div>
+                            <div class="col-sm-12 col-md-3">
+                                <label class="form-control-label">PML</label>
+                                <select onchange="onMainSampleFilter()" id="pml" class="form-control" data-toggle="select" name="status_sample" required>
+                                    <option value="all">
+                                        Semua
+                                    </option>
+                                    @foreach($pml as $p)
+                                    <option value="{{$p->id}}">
+                                        {{$p->name}}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-sm-12 col-md-3">
+                                <label class="form-control-label">PCL</label>
+                                <select onchange="onMainSampleFilter()" id="pcl" class="form-control" data-toggle="select" name="status_sample" required>
+                                    <option value="all">
+                                        Semua
+                                    </option>
+                                    @foreach($pcl as $p)
+                                    <option value="{{$p->id}}">
+                                        {{$p->name}}
+                                    </option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -125,6 +151,13 @@
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-3 p-0 my-1 mx-1">
                             <input placeholder="Kategori" type="text" name="category" id="category-filter" class="form-control" onchange="filter()">
+                        </div>
+                        <div class="col-sm-12 col-md-6 col-lg-3 p-0 my-1 mx-1">
+                            <p class="mb-0" style="font-size: 0.7rem;">Tampilkan Sample Tambahan?</p>
+                            <label class="custom-toggle">
+                                <input type="checkbox" id="additional-filter">
+                                <span class="custom-toggle-slider rounded-circle" data-label-off="Tidak" data-label-on="Ya"></span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -208,6 +241,31 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header pb-1">
+                <div>
+                    <h2 id="modaltitle">Detail Sampel</h2>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body pt-0" style="height: auto;">
+                <h3 id="sample-name-detail"></h3>
+                <p id="address-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+                <p id="strata-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+                <p id="kbli-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+                <p id="category-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+                <p id="subdistrict-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+                <p id="village-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+                <p id="job-detail" style="font-size: 0.9rem;" class="mb-0"></p>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('optionaljs')
@@ -228,14 +286,19 @@
         "columns": [{
                 "responsivePriority": 1,
                 "data": "sample_name",
+                "width": "20%",
                 "render": function(data, type, row) {
                     if (type === 'display') {
                         return `
-                            <h5><i class="fas fa-arrow-alt-circle-down text-danger"></i> [${row.sample_unique_code}] ${row.sample_name}</h5>
+                            <h5 style="cursor: pointer" onclick='openDetail(${JSON.stringify(row)}, true, false)' data-toggle="modal" data-target="#detailModal">
+                                <i class="fas fa-arrow-alt-circle-down text-danger"></i> [${row.sample_unique_code}] ${row.sample_name}
+                                <i class="fas fa-info-circle text-info"></i>
+                            </h5>
                             <p style="font-size: 0.9rem" class="mb-1">[${row.subdistrict_code}] ${row.subdistrict_name}, [${row.village_code}] ${row.village_name}</p>
                             <p class="mb-1" style="font-size: 0.9rem;">${row.sample_address}</p>
                             <p class="mb-1" style="font-size: 0.9rem;">${row.pcl}</p>
                             <p class="mb-1" style="font-size: 0.9rem;">${row.pml}</p>
+                            <h5 class="mb-1">Kategori: ${row.category}</h5>
                         `
                     }
                     return data;
@@ -244,6 +307,7 @@
             {
                 "responsivePriority": 1,
                 "data": "replacement_chain",
+                "width": "20%",
                 "render": function(data, type, row) {
                     if (type === 'display') {
 
@@ -251,12 +315,19 @@
                         for (var i = 0; i < data.length; i++) {
                             if (i > 0) {
                                 var icon = ''
+                                var isreplaced = false
+                                var isreplacing = false
                                 if (data[i].status == 'Tidak Aktif' && data[i].replacement_id != null) {
                                     icon = '<i class="fas fa-arrow-alt-circle-up text-success"></i><i class="fas fa-arrow-alt-circle-down text-danger"></i>'
+                                    isreplaced = true
+                                    isreplacing = true
                                 } else {
                                     icon = '<i class="fas fa-arrow-alt-circle-up text-success"></i>'
+                                    isreplacing = true
                                 }
-                                html = html + `<h5>${icon} [${data[i].sample_unique_code}] ${data[i].sample_name}</h5>`
+                                var detail = `<i class="fas fa-info-circle text-info"></i>`
+
+                                html = html + `<h5 style="cursor: pointer" onclick='openDetail(${JSON.stringify(data[i])}, ${isreplaced}, ${isreplacing})' data-toggle="modal" data-target="#detailModal">${icon} [${data[i].sample_unique_code}] ${data[i].sample_name} ${detail}</h5>`
                             }
 
                             if (data[i].replacement_id == null && data[i].status == 'Tidak Aktif') {
@@ -265,6 +336,10 @@
                                 html = html + `<p class="text-success mb-1 font-weight-bold" style="font-size: 0.9rem">Sampel Pengganti Berhasil Dicacah</p>`
                             } else if (data[i].replacement_id == null && (data[i].status == null || data[i].status == 'Belum Dicacah')) {
                                 html = html + `<p class="text-muted mb-1 font-weight-bold" style="font-size: 0.9rem">Sampel Pengganti Sedang Dicacah</p>`
+                            }
+
+                            if (data[i].replacement_id == null){
+                                html = html + `<h5 class="mb-1">Kategori: ${data[i].category}</h5>`
                             }
                         }
                         return html
@@ -300,8 +375,23 @@
         }
     });
 
-    function onStatusSampleChange() {
-        table.ajax.url('/sample/status/?status=' + document.getElementById('status_sample').value).load();
+    function onMainSampleFilter() {
+        var url = '?'
+
+        var statusfilter = ''
+        if (document.getElementById('status_sample').value != '') {
+            url = url + '&status=' + document.getElementById('status_sample').value
+        }
+        var pmlfilter = ''
+        if (document.getElementById('pml').value != '') {
+            url = url + '&pml=' + document.getElementById('pml').value
+        }
+        var pclfilter = ''
+        if (document.getElementById('pcl').value != '') {
+            url = url + '&pcl=' + document.getElementById('pcl').value
+        }
+
+        table.ajax.url('/sample/status/' + url).load();
     }
 
     function updateModal(sample) {
@@ -316,6 +406,7 @@
         document.getElementById('kbli-filter').value = ''
         document.getElementById('strata-filter').value = ''
         document.getElementById('category-filter').value = ''
+        document.getElementById('additional-filter').checked = false
 
         document.getElementById('id-sample-change').innerHTML = `
                 <h3><i class="fas fa-arrow-alt-circle-down text-danger"></i> [${sample.sample_unique_code}] ${sample.sample_name}</h3>
@@ -367,6 +458,7 @@
                     if (type === 'display') {
                         var html = `
                             <h5 class="mb-1">[${row.sample_unique_code}] ${data}</h5>
+                            <p style="font-size: 0.9rem" class="mb-1">${row.type}</p>
                             <p style="font-size: 0.9rem" class="mb-1">[${row.subdistrict_code}] ${row.subdistrict_name}</p>
                             <p style="font-size: 0.9rem" class="mb-1">[${row.village_code}] ${row.village_name}</p>
                             <p style="font-size: 0.9rem" class="mb-1">${row.sample_address}</p>
@@ -457,6 +549,10 @@
         }
     });
 
+    document.getElementById('additional-filter').addEventListener('change', function() {
+        filter();
+    });
+
     function selectChange(sample) {
         document.getElementById('replacement').innerHTML = `
             <h5><i class="fas fa-arrow-alt-circle-up text-success"></i> [${sample.sample_unique_code}] ${sample.sample_name}</h5>
@@ -489,6 +585,12 @@
         var categoryfilter = ''
         if (document.getElementById('category-filter').value != '') {
             url = url + '&category=' + document.getElementById('category-filter').value
+        }
+        var additionalfilter = ''
+        if (document.getElementById('additional-filter').checked) {
+            url = url + '&additional=1'
+        } else {
+            url = url + '&additional=0'
         }
 
         tablechange.ajax.url('/sample/change/' + url).load();
@@ -561,6 +663,24 @@
             }
         });
 
+    }
+
+    function openDetail(sample, isreplaced, isreplacing) {
+        var icon = ''
+        if (isreplaced) {
+            icon = icon + `<i class="fas fa-arrow-alt-circle-down text-danger"></i>`
+        }
+        if (isreplacing) {
+            icon = icon + `<i class="fas fa-arrow-alt-circle-up text-success"></i>`
+        }
+        document.getElementById('sample-name-detail').innerHTML = `${icon} [${sample.sample_unique_code}] ${sample.sample_name}`
+        document.getElementById('address-detail').innerHTML = `Alamat: ${sample.sample_address}`
+        document.getElementById('strata-detail').innerHTML = `Strata: ${sample.strata}`
+        document.getElementById('kbli-detail').innerHTML = `KBLI: ${sample.kbli}`
+        document.getElementById('category-detail').innerHTML = `Kategori: ${sample.category}`
+        document.getElementById('subdistrict-detail').innerHTML = `Kecamatan: [${sample.subdistrict_code}] ${sample.subdistrict_name}`
+        document.getElementById('village-detail').innerHTML = `Desa/Kel: [${sample.village_code}] ${sample.village_name}`
+        document.getElementById('job-detail').innerHTML = `Kegiatan: ${sample.job}`
     }
 </script>
 @endsection

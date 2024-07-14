@@ -169,6 +169,13 @@ class MainController extends Controller
             $records = $records->where(['pcl_id' => $user->id]);
         }
 
+        if ($request->pml != null && $request->pml != 'all'){
+            $records = $records->where(['pml_id' => $request->pml]);
+        }
+        if ($request->pcl != null && $request->pcl != 'all'){
+            $records = $records->where(['pcl_id' => $request->pcl]);
+        }
+
         $recordsTotal = $records->count();
 
         $orderColumn = 'modified_at';
@@ -234,21 +241,16 @@ class MainController extends Controller
             $sampleData["subdistrict_name"] = $sample->subdistrict_name;
             $sampleData["village_code"] = $sample->village_code;
             $sampleData["village_name"] = $sample->village_name;
+            $sampleData["job"] = $sample->job;
+            $sampleData["strata"] = $sample->strata;
+            $sampleData["kbli"] = $sample->kbli;
+            $sampleData["category"] = $sample->category;
 
             $sampleData['replacement_chain'] = $sample->getReplacementChain();
-            // $sampleData["replacement_unique_code"] = $sample->replacement != null ? $sample->replacement->sample_unique_code : '';
-            // $sampleData["replacement_name"] = $sample->replacement != null ? $sample->replacement->sample_name : '';
-            // $sampleData["replacement_address"] = $sample->replacement != null ? $sample->replacement->sample_address : '';
 
             $samplesArray[] = $sampleData;
             $i++;
         }
-
-        // Sample::where(['sample_unique_code' => ''])->first()->update([
-        //     'village_code' => '',
-        //     'village_name' => '',
-        //     'bs_code' => ''
-        // ])
 
         return json_encode([
             "draw" => $request->draw,
@@ -270,7 +272,17 @@ class MainController extends Controller
             return abort(401);
         }
 
-        $records = $records = Sample::where('type', '=', 'Cadangan');
+        $records = null;
+
+        if ($request->additional == null || $request->additional == false) {
+            $records = $records = Sample::where('type', '=', 'Cadangan');
+        } else if ($request->additional == true) {
+            $records = $records = Sample::where(function ($subQuery) {
+                $subQuery->where('type', '=', 'Cadangan')
+                    ->orWhere('type', '=', 'Cadangan Tambahan');
+            });
+        }
+
         if ($request->kbli != null) {
             $records->where('kbli', 'LIKE', '%' . $request->kbli . '%');
         }
